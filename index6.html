@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sena'ya Özel Sürpriz</title>
+<style>
+    body {
+        margin: 0;
+        font-family: 'Poppins', sans-serif;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        flex-direction: column;
+        background: linear-gradient(135deg, #1a001a, #000000);
+        color: white;
+        cursor: none;
+        position: relative;
+    }
+
+    canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    /* GİRİŞ EKRANI */
+    #loginScreen {
+        text-align: center;
+        z-index: 2;
+    }
+
+    #loginScreen input {
+        font-size: 1.5rem;
+        padding: 10px;
+        border-radius: 10px;
+        border: none;
+        text-align: center;
+        margin-top: 15px;
+    }
+
+    #loginScreen button {
+        font-size: 1.2rem;
+        padding: 8px 20px;
+        margin-top: 15px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        background-color: #ff66cc;
+        color: white;
+    }
+
+    #hint {
+        font-size: 0.9rem;
+        margin-top: 10px;
+        color: #ff99dd;
+        text-shadow: 0 0 5px #ff66cc;
+    }
+
+    /* EMOJİLER */
+    #emojiScreen {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        z-index: 2;
+    }
+
+    #senaTitle {
+        font-size: 2rem;
+        margin-bottom: 20px;
+        color: #ff99dd;
+        text-shadow: 0 0 10px #ff66cc;
+    }
+
+    #emojiNote {
+        font-size: 1rem;
+        margin-top: 10px;
+        color: #ff66cc;
+    }
+
+    #emojiler {
+        display: flex;
+        gap: 25px;
+        font-size: 60px;
+        cursor: pointer;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    #miniMesaj {
+        margin-top: 40px;
+        font-size: 1.5rem;
+        color: #ff99dd;
+        text-align: center;
+        min-height: 40px;
+        text-shadow: 0 0 10px #ff66cc;
+    }
+
+    #footer {
+        position: absolute;
+        bottom: 10px;
+        font-size: 0.9rem;
+        color: #ff99dd;
+        text-shadow: 0 0 5px #ff66cc;
+        z-index: 2;
+    }
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+
+<div id="loginScreen">
+    <h1>Merhaba Sena...</h1>
+    <p>Lütfen sürprizi açmak için şifreyi gir</p>
+    <input type="password" id="passwordInput" placeholder="Şifreyi gir" />
+    <br>
+    <button id="unlockBtn">Aç</button>
+    <div id="hint">İpucu: Doğum yılın 😉</div>
+</div>
+
+<div id="emojiScreen">
+    <div id="senaTitle">Sena, senin için 💖</div>
+    <div id="emojiNote">Emojilere tıkla ve mini sürprizleri gör 🎉</div>
+    <div id="emojiler">
+        <div class="emoji">🎈</div>
+        <div class="emoji">🎁</div>
+        <div class="emoji">💖</div>
+        <div class="emoji">🌟</div>
+        <div class="emoji">😂</div>
+        <div class="emoji">🍬</div>
+        <div class="emoji">🎀</div>
+    </div>
+    <div id="miniMesaj"></div>
+</div>
+
+<div id="footer">Bu site Mustafa Uysal tarafından ablası için oluşturulmuştur.</div>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let mouse = { x: canvas.width/2, y: canvas.height/2 };
+
+    window.addEventListener('mousemove', function(e){
+        mouse.x = e.x;
+        mouse.y = e.y;
+    });
+
+    class Trail {
+        constructor(x, y, color){
+            this.x = x;
+            this.y = y;
+            this.color = color;
+            this.alpha = 1;
+            this.size = 10;
+        }
+        update(){
+            this.alpha -= 0.02;
+        }
+        draw(){
+            ctx.fillStyle = `hsla(${this.color},100%,70%,${this.alpha})`;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+            ctx.fill();
+        }
+    }
+
+    let trails = [];
+
+    function animate(){
+        ctx.fillStyle = 'rgba(0,0,0,0.1)';
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+
+        trails.forEach((t,index)=>{
+            t.update();
+            t.draw();
+            if(t.alpha<=0) trails.splice(index,1);
+        });
+
+        trails.push(new Trail(mouse.x, mouse.y, Math.random()*360));
+
+        requestAnimationFrame(animate);
+    }
+    animate();
+
+    // ÖZEL FARE İMLECİ
+    function drawCursor(){
+        ctx.fillStyle = '#ff66cc';
+        ctx.beginPath();
+        ctx.moveTo(mouse.x, mouse.y);
+        ctx.lineTo(mouse.x-10, mouse.y+20);
+        ctx.lineTo(mouse.x+10, mouse.y+20);
+        ctx.closePath();
+        ctx.fill();
+        requestAnimationFrame(drawCursor);
+    }
+    drawCursor();
+
+    const correctPassword = '2002';
+    const unlockBtn = document.getElementById('unlockBtn');
+    const passwordInput = document.getElementById('passwordInput');
+    const loginScreen = document.getElementById('loginScreen');
+    const emojiScreen = document.getElementById('emojiScreen');
+    const emojiler = document.querySelectorAll('#emojiler .emoji');
+    const miniMesaj = document.getElementById('miniMesaj');
+
+    const mesajlar = [
+        "Sena, sen dünyanın en tatlı ablasısın! 💕",
+        "Kardeşin seni çok seviyor 😘",
+        "Bugün tamamen senin günün! 🌸",
+        "Hayatın hep eğlenceli ve renkli olsun 🎨",
+        "Gülüşün dünyayı aydınlatıyor 🌟",
+        "Sürprizleri sevdiğini biliyorum 😉",
+        "Seninle vakit geçirmek her zaman keyifli 😄"
+    ];
+
+    unlockBtn.addEventListener('click', () => {
+        if(passwordInput.value === correctPassword){
+            loginScreen.style.display = 'none';
+            emojiScreen.style.display = 'flex';
+        } else {
+            alert('Yanlış şifre! Tekrar dene.');
+            passwordInput.value = '';
+        }
+    });
+
+    emojiler.forEach(emoji => {
+        emoji.addEventListener('click', () => {
+            const randomIndex = Math.floor(Math.random() * mesajlar.length);
+            miniMesaj.textContent = mesajlar[randomIndex];
+        });
+    });
+</script>
+</body>
+</html>
